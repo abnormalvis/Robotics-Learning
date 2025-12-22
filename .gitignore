@@ -1,0 +1,21 @@
+## Catkin/catkin_tools build outputs
+build/
+build_isolated/
+devel/
+devel_isolated/
+install/
+logs/
+
+## catkin_tools metadata
+.catkin_tools/
+src/.catkin_tools/
+
+## Common editor/OS junk (optional but handy)
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+src/ros_controllers/
+src/rm_controllers/
+src/rm_control/
