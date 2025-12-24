@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<robot name="rbo" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <link name="car_link">
+    <!-- visual标签：这表示着我们是否可以在图形界面上观察到这个link，没有的话就观察不到，主要包含geometry标签 -->
+        <visual>
+            <geometry>
+                <box size="2.0 1.0 0.5"/>
+            </geometry>
+        </visual>
+        <!-- vcollision标签：这表示着传感器(主要指激光等投射型的传感器)是否可以在物理引擎上检测到这个link，同时标志着是否会与别的link进行碰撞检测，也主要包含geometry标签 -->
+        <collision>
+            <geometry>
+                <box size="2.0 1.0 0.5"/>
+            </geometry>
+        </collision>
+    </link>
+</robot>

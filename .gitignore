@@ -19,3 +19,5 @@ src/.catkin_tools/
 src/ros_controllers/
 src/rm_controllers/
 src/rm_control/
+src/Collision-avoidance-training-of-PPO-in-Gazebo/
+src/MECANUM_DRIVE/
