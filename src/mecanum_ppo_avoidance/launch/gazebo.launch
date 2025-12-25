@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <!-- 启动参数 -->
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="world_name" default="$(find mecanum_ppo_avoidance)/worlds/empty.world"/>
+  
+  <!-- 加载机器人URDF模型到参数服务器 -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find mecanum_ppo_avoidance)/urdf/hero2.urdf.xacro' 
+                  load_chassis:=true 
+                  load_gimbal:=false 
+                  load_shooter:=false 
+                  use_simulation:=true
+                  roller_type:=simple" />
+  
+  <!-- 启动Gazebo空世界 -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+  
+  <!-- 在Gazebo中生成机器人模型 -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        respawn="false" output="screen"
+        args="-urdf -model hero_robot -param robot_description -x 0 -y 0 -z 0.1"/>
+  
+  <!-- 发布机器人状态 -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        respawn="false" output="screen">
+    <param name="publish_frequency" type="double" value="50.0"/>
+  </node>
+  
+  <!-- 联合状态发布器（可选） -->
+  <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/> -->
+  
+</launch>
