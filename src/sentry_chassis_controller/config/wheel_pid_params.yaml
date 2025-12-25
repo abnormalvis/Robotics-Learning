@@ -1,0 +1,173 @@
+wheel_pid_controller:
+  # 说明：
+  # - rqt_reconfigure 使用一组扁平的动态参数键（如 wheel_fl_p、pivot_fr_i_clamp）。
+  # - 本 YAML 使用分层键（wheels/wheel_fl/p 等）作为启动默认值。
+  # - 运行时我们会把动态参数"镜像回写"到对应的分层键上，便于 rosparam get 旧路径看到最新值；
+  #   但这不会自动写回文件。如需持久化，请在运行后使用 rosparam/dynparam dump 导出。
+  type: "sentry_chassis_controller/WheelPidController"
+  # Subscribe directly to the resolver's output (absolute topic recommended)
+  cmd_vel_topic: "/cmd_vel"
+  # Do not synthesize fake joint movement by default
+  synthetic_fallback: false
+  
+  # ========== 方案 A：速度坐标系由控制器统一处理 ==========
+  # speed_mode 决定控制器如何处理收到的 /cmd_vel 速度命令：
+  #   - global: 将速度从 odom_frame 转换到 base_link_frame（使用 TF）
+  #             适用于键盘节点 velocity_mode=global 的情况
+  #   - local:  直接使用收到的速度（假定已在 base_link 系中）
+  #             适用于键盘节点 velocity_mode=chassis 的情况
+  # 注意：speed_mode 应与键盘节点的 velocity_mode 保持一致！
+  speed_mode: "local"
+  #speed_mode: "global"
+  # Frame IDs for odometry and TF
+  odom_frame: "odom"
+  base_link_frame: "base_link"
+  
+  # TF Publishing Control（TF 发布控制）
+  # 当使用 Ground Truth 里程计时，TF 由 gazebo_odom_bridge 发布，
+  # 控制器应禁用 TF 发布以避免冲突（设为 false）
+  # 默认 true：控制器自己发布 odom → base_link 的 TF
+  publish_tf: false  # 使用 ground truth 时设为 false
+  
+  # Physical defaults (can be overridden per-wheel below)
+  wheel_track: 0.36
+  wheel_base: 0.36
+  wheel_radius: 0.05
+
+  # Default PID for pivot (steering) and wheel (drive). These act as
+  # fallbacks if a per-wheel entry is not provided.
+  pivot:
+    p: 1.1      # 从1.3降至1.1，避免转向过快冲击
+    i: 0.0      # 你的判断正确，位置环无需I
+    d: 0.12     # 从0.25降至0.12，减少噪声注入速度环
+    i_clamp: 0.0
+    antiwindup: 0.0
+  wheel:
+    p: 0.4      # 从0.7降至0.4，削减振荡能量源
+    i: 0.0      # 保持为0，积分会加剧相位滞后
+    d: 0.35     # 从0.2增至0.35，强制增加阻尼
+    i_clamp: 0.0
+    antiwindup: 0.0
+
+  # Optional explicit wheel ordering (controller can use this to iterate)
+  wheel_names:
+    - wheel_fl
+    - wheel_fr
+    - wheel_rl
+    - wheel_rr
+    - pivot_fl
+    - pivot_fr
+    - pivot_rl
+    - pivot_rr
+
+  # Per-wheel PID overrides. If a wheel entry is missing, controller should
+  # fallback to the `wheel` or `pivot` defaults above.
+  wheels:
+    wheel_fl:
+      p: 0.4      # 从0.7降至0.4，削减振荡能量源
+      i: 0.0      # 保持为0，积分会加剧相位滞后
+      d: 0.35     # 从0.2增至0.35，强制增加阻尼
+      i_clamp: 0.0
+      output_min: -20.0
+      output_max: 20.0
+    wheel_fr:
+      p: 0.4      # 从0.7降至0.4，削减振荡能量源
+      i: 0.0      # 保持为0，积分会加剧相位滞后
+      d: 0.35     # 从0.2增至0.35，强制增加阻尼
+      i_clamp: 0.0
+      output_min: -20.0
+      output_max: 20.0
+    wheel_rl:
+      p: 0.4      # 从0.7降至0.4，削减振荡能量源
+      i: 0.0      # 保持为0，积分会加剧相位滞后
+      d: 0.35     # 从0.2增至0.35，强制增加阻尼
+      i_clamp: 0.0
+      output_min: -20.0
+      output_max: 20.0
+    wheel_rr:
+      p: 1.1      # 从1.3降至1.1，避免转向过快冲击
+      i: 0.0      # 你的判断正确，位置环无需I
+      d: 0.12     # 从0.25降至0.12，减少噪声注入速度环
+      i_clamp: 0.0
+      output_min: -20.0
+      output_max: 20.0
+    pivot_fl:
+      p: 1.1
+      i: 0.0
+      d: 0.12
+      i_clamp: 0.0
+      output_min: -10.0
+      output_max: 10.0
+    pivot_fr:
+      p: 1.1      # 从1.3降至1.1，避免转向过快冲击
+      i: 0.0      # 你的判断正确，位置环无需I
+      d: 0.12     # 从0.25降至0.12，减少噪声注入速度环
+      i_clamp: 0.0
+      output_min: -10.0
+      output_max: 10.0
+    pivot_rl:
+      p: 1.1
+      i: 0.0
+      d: 0.12
+      i_clamp: 0.0
+      output_min: -10.0
+      output_max: 10.0
+    pivot_rr:
+      p: 1.1
+      i: 0.0
+      d: 0.12
+      i_clamp: 0.0
+      output_min: -10.0
+      output_max: 10.0
+
+  # 底盘功率限制（与控制器同级参数，而非 wheels 内部）
+  # 增大功率上限以支持爬坡（原值 100.0，增大到 300.0）
+  power_limit: 300.0
+  power:
+    # 降低 effort_coeff 以减少对力矩的限制（原值 12.0，降到 6.0）
+    effort_coeff: 6.0
+    velocity_coeff: 0.0048
+    power_offset: 0.0
+
+  # 调试：发布功率限制调试信息（/power_debug）
+  power_debug: true
+
+  # ========== 底盘自锁功能参数 ==========
+  # 自锁功能：当无速度命令时，主动锁定轮子位置以防止滑动/抖动
+  # 适用场景：斜坡停车、静止抖动抑制、防止里程计漂移
+  self_lock:
+    # 启用/禁用自锁功能（true=启用，false=禁用）
+    enabled: true
+    # 空闲超时阈值（秒）：超过此时间未收到 cmd_vel 命令后进入自锁状态
+    # 建议值：0.3~1.0秒，太短会导致频繁切换，太长会导致响应延迟
+    idle_timeout: 0.5
+    # 里程计速度死区（m/s 和 rad/s）：小于此阈值的速度视为零
+    # 用于消除静止时传感器噪声导致的里程计漂移
+    # 建议值：0.05~0.1，根据实际噪声水平调整（增大可减少漂移）
+    velocity_deadband: 0.05
+    
+    # ========== 位置锁定模式（改进版）==========
+    # 启用位置锁定（true）：在自锁时记录轮子位置，使用位置 PD 控制器锁定
+    #   优点：在斜坡上可以有效抵抗重力，不会产生震荡
+    # 禁用位置锁定（false）：使用速度锁定（目标速度=0，由速度 PID 控制）
+    #   缺点：在斜坡上会因重力导致轮子转动，PID 反复纠正产生震荡
+    lock_position: false
+    
+    # 位置锁定 PD 参数（仅在 lock_position=true 时生效）
+    # P 增益：位置误差的响应强度，越大锁定越紧但可能震荡
+    # D 增益：速度阻尼，用于抑制震荡
+    lock_pos_p: 8.0    # 位置锁定 P 增益（建议值：5.0~15.0）
+    lock_pos_i: 0.0    # 位置锁定 I 增益（建议值：0.0）
+    lock_pos_d: 1.0    # 位置锁定 D 增益（建议值：0.5~2.0）
+    
+    # ========== 几何自锁模式（结构自锁）==========
+    # 原理：将4个舵轮转到底盘自转的切向方向（形成"X"字布局）
+    #       此时任意平移方向的外力都与轮子滚动方向垂直
+    #       轮子只能侧滑（滑动摩擦）而不能滚动（滚动摩擦）
+    #       滑动摩擦系数 >> 滚动摩擦系数，从而实现结构自锁
+    # 优点：依靠物理结构抵抗外力，无需持续输出力矩，节省能量
+    # 缺点：转向需要时间，切换响应略慢
+    # 注意：geo_lock_enabled 优先级高于 lock_position
+    geo_lock_enabled: true   # 几何自锁开关（true=启用，false=禁用）
+    geo_lock_wheel_brake: true # 几何自锁时是否同时锁定轮子（true=锁定，false=自由）
+    # 舵角会自动根据底盘尺寸计算：θ = atan2(wheel_base/2, -wheel_track/2) 等
