@@ -1,0 +1,9 @@
+<library path="lib/libmecanum_ppo_avoidance">
+  <class name="mecanum_chassis_controller/MecanumChassisController" 
+         type="mecanum_chassis_controller::MecanumChassisController" 
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      Mecanum wheel chassis controller for hero robot.
+    </description>
+  </class>
+</library>

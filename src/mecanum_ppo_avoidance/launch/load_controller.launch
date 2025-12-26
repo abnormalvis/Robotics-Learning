@@ -1,0 +1,20 @@
+<launch>
+  <!-- 先启动显示（Gazebo + RViz + TF），确保仿真环境运行后再加载控制器 -->
+  <include file="$(find mecanum_ppo_avoidance)/launch/display_with_tf.launch"/>
+
+  <!-- 加载控制器参数 -->
+  <rosparam file="$(find mecanum_ppo_avoidance)/config/params.yaml" command="load"/>
+  
+    <!-- 加载控制器（延迟启动以等待 controller_manager 可用） -->
+    <node name="spawner_wheel_pid" 
+          pkg="controller_manager"    
+          type="spawner"  
+          respawn="false"
+          output="screen" 
+          launch-prefix="bash -c 'sleep 5; $0 $@'"
+          args="joint_state_controller mecanum_chassis_controller"/>
+  
+  <!-- 键盘遥控节点 -->
+  <node name="teleop" pkg="mecanum_ppo_avoidance" type="hero_teleop" output="screen"/>
+
+</launch>
