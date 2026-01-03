@@ -20,5 +20,6 @@ src/ros_controllers/
 src/rm_controllers/
 src/rm_control/
 src/rm_description/
-src/Collision-avoidance-training-of-PPO-in-Gazebo/
 src/MECANUM_DRIVE/
+referee/
+referee/Collision-avoidance-training-of-PPO-in-Gazebo/
