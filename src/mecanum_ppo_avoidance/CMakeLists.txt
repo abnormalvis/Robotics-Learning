@@ -28,6 +28,11 @@ find_package(catkin REQUIRED
     nav_msgs
     tf2_geometry_msgs
     tf2_ros
+    visualization_msgs
+    geometry_msgs
+    base_local_planner
+    costmap_2d
+    nav_core
     )
 
 ## Find system libraries
@@ -66,6 +71,11 @@ catkin_package(
     tf
     nav_msgs
     tf2_ros
+    visualization_msgs
+    geometry_msgs
+    base_local_planner
+    costmap_2d
+    nav_core
     DEPENDS
     ## find_package(Eigen3) provides a non standard EIGEN3_INCLUDE_DIR instead of Eigen3_INCLUDE_DIRS.
     ## Therefore, the DEPEND does not work as expected and we need to add the directory to the INCLUDE_DIRS
@@ -81,7 +91,11 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+# generate_dynamic_reconfigure_options(
+#     cfg/PathFollowLocalPlanner.cfg
+# )
 add_executable(teleop src/teleop.cpp)
+
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
@@ -89,20 +103,38 @@ include_directories(
 )
 
 ## Declare cpp executables
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
     src/mecanum_chassis_controller.cpp
+    src/waypoint_global_planner.cpp
+    src/path_follow_local_planner.cpp
 )
 
 add_dependencies(${PROJECT_NAME}
     ${catkin_EXPORTED_TARGETS}
     )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(
+    ${PROJECT_NAME}
     ${catkin_LIBRARIES}
-    )
-    target_link_libraries(teleop
+)
+
+target_link_libraries(
+    teleop
     ${catkin_LIBRARIES}
-    )
+)
+
+install(
+    DIRECTORY include/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING
+    PATTERN "*.h"   # 找到头文件
+    PATTERN "*.hpp"
+)
+install(
+    TARGETS ${PROJECT_NAME}
+    ARCHIVE DESTINATION $(CATKIN_PACKAGE_LIB_DESTINATION)
+    LIBRARY DESTINATION $(CATKIN_PACKAGE_LIB_DESTINATION)
+)
 ##########################
 
 roslint_cpp()

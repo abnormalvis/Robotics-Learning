@@ -1,1 +1,0 @@
-pkill -f roslaunch &> /dev/null || true; pkill -f Gazebo &> /dev/null || true; pkill -f gzserver &> /dev/null || true; pkill -f gzclient &> /dev/null || true

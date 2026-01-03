@@ -5,6 +5,7 @@
 - 12月25日：导入麦轮底盘模型，在gazebo和rviz中进行显示
 - 12月26日：当前运行 `load_controller.launch` 控制器没有被正确加载出来-> 在 `rosservice call /controller_manager/list_controllers` 命令查看控制器时，没有找到任何被加载的控制器，命令行返回 `controller: []`，我希望应该正确加载 `mecanum_chassis_controller `, 运行日志保存在 `run_with_log.log` 中
 ## 代办事项
+- 12月27日：
 
 - 正确完成 `rviz` 中底盘模型的显示，包括材质和关节TF变换的发布
 - 完成底盘 `ros_control` 控制器的编写，使用力矩控制器控制底盘

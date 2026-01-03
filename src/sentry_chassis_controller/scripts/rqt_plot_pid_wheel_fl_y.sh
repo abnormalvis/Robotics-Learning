@@ -1,1 +1,0 @@
-rqt_plot /odom_controller/twist/twist/linear/y /cmd_vel/linear/y

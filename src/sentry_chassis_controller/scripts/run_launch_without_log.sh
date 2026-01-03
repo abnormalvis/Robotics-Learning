@@ -1,2 +1,0 @@
-source ~/final_ws/devel/setup.bash
-roslaunch sentry_chassis_controller sentry_with_odom_feature.launch
